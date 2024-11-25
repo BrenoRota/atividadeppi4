@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-app.use(express.static('./pages/pubic'));
+app.use(express.static('./pages/public'));
 const porta = 4001;
 const host = '0.0.0.0';
 
