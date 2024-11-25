@@ -1,16 +1,18 @@
 const express = require('express');
 const session = require('express-session');
 const app = express();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(
+    session({
+        secret: 'chave-secreta',
+        resave: false,
+        saveUninitialized: true,
+    })
+);
+
 const porta = 4001;
 const host = '0.0.0.0';
-
-app.use(express.static('./pages/public'));
-app.use(express.urlencoded({ extended: true }));
-app.use(session({
-    secret: 'chave-secreta',
-    resave: false,
-    saveUninitialized: true
-}));
 
 let listaProdutos = [];
 
@@ -22,41 +24,6 @@ function verificarAutenticacao(req, resp, next) {
     }
 }
 
-app.get('/', (req, resp) => {
-    resp.send(`
-        <html>
-            <head>
-                <title>Bem-vindo</title>
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                <style>
-                    body {
-                        background: linear-gradient(45deg, #66cc66, #ffcc00, #ff9900);
-                        min-height: 100vh;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    }
-                    .container {
-                        text-align: center;
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 10px;
-                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Bem-vindo ao Cadastro de Produtos</h1>
-                    <a class="btn btn-primary btn-lg m-2" href="/cadastrarProduto">Cadastrar Produto</a>
-                    <a class="btn btn-success btn-lg m-2" href="/listarProdutos">Ver Produtos Cadastrados</a>
-                    <a class="btn btn-warning btn-lg m-2" href="/login">Login</a>
-                </div>
-            </body>
-        </html>
-    `);
-});
-
 app.get('/login', (req, resp) => {
     resp.send(`
         <html>
@@ -66,7 +33,7 @@ app.get('/login', (req, resp) => {
             </head>
             <body>
                 <div class="container w-25 mt-5">
-                    <form action='/login' method='POST' class="row g-3 needs-validation">
+                    <form action='/login' method='POST' class="row g-3 needs-validation" novalidate>
                         <fieldset class="border p-2">
                             <legend class="mb-3">Autenticação do Sistema</legend>
                             <div class="col-md-12">
@@ -104,16 +71,32 @@ app.post('/login', (req, resp) => {
     }
 });
 
-app.get('/cadastrarProduto', verificarAutenticacao, (req, resp) => {
-    cadastroProdutoView(req, resp);
+app.get('/logout', (req, resp) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Erro ao destruir a sessão:', err);
+        }
+        resp.redirect('/login');
+    });
 });
 
-app.get('/listarProdutos', verificarAutenticacao, (req, resp) => {
-    listarProdutosView(req, resp);
-});
-
-app.post('/cadastrarProduto', verificarAutenticacao, (req, resp) => {
-    cadastrarProduto(req, resp);
+app.get('/', verificarAutenticacao, (req, resp) => {
+    resp.send(`
+        <html>
+            <head>
+                <title>Bem-vindo</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            </head>
+            <body>
+                <div class="container text-center mt-5">
+                    <h1>Bem-vindo ao Cadastro de Produtos</h1>
+                    <a class="btn btn-primary m-2" href="/cadastrarProduto">Cadastrar Produto</a>
+                    <a class="btn btn-success m-2" href="/listarProdutos">Ver Produtos Cadastrados</a>
+                    <a class="btn btn-danger m-2" href="/logout">Sair</a>
+                </div>
+            </body>
+        </html>
+    `);
 });
 
 function cadastroProdutoView(req, resp) {
@@ -122,21 +105,6 @@ function cadastroProdutoView(req, resp) {
             <head>
                 <title>Cadastro de Produtos</title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                <style>
-                    body {
-                        background: linear-gradient(45deg, #66cc66, #ffcc00, #ff9900);
-                        min-height: 100vh;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    }
-                    .container {
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 10px;
-                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    }
-                </style>
             </head>
             <body>
                 <div class="container mt-5">
@@ -186,21 +154,6 @@ function listarProdutosView(req, resp) {
             <head>
                 <title>Lista de Produtos</title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                <style>
-                    body {
-                        background: linear-gradient(45deg, #66cc66, #ffcc00, #ff9900);
-                        min-height: 100vh;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                    }
-                    .container {
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 10px;
-                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                    }
-                </style>
             </head>
             <body>
                 <div class="container mt-5">
@@ -231,6 +184,8 @@ function listarProdutosView(req, resp) {
                             `).join('')}
                         </tbody>
                     </table>
+                    <a class="btn btn-primary" href="/">Voltar ao Início</a>
+                    <a class="btn btn-danger" href="/logout">Sair</a>
                 </div>
             </body>
         </html>
@@ -239,9 +194,20 @@ function listarProdutosView(req, resp) {
 
 function cadastrarProduto(req, resp) {
     const { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante } = req.body;
-    listaProdutos.push({ codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante });
+
+    if (Number(precoCusto) > Number(precoVenda)) {
+        return resp.send("Erro: O preço de custo não pode ser maior que o preço de venda!");
+    }
+
+    const produto = { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante };
+    listaProdutos.push(produto);
+
     resp.redirect('/listarProdutos');
 }
+
+app.get('/cadastrarProduto', verificarAutenticacao, cadastroProdutoView);
+app.get('/listarProdutos', verificarAutenticacao, listarProdutosView);
+app.post('/cadastrarProduto', verificarAutenticacao, cadastrarProduto);
 
 app.listen(porta, host, () => {
     console.log(`Servidor rodando em http://${host}:${porta}`);
