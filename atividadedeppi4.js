@@ -166,6 +166,21 @@ function listarProdutosView(req, resp) {
     `);
 }
 
+// Função de cadastro de produto
+function cadastrarProduto(req, resp) {
+    const { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante } = req.body;
+
+    // Validações adicionais (exemplo)
+    if (Number(precoCusto) > Number(precoVenda)) {
+        return resp.send("Erro: O preço de custo não pode ser maior que o preço de venda!");
+    }
+
+    const produto = { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante };
+    listaProdutos.push(produto);
+
+    resp.redirect('/listarProdutos');
+}
+
 // Rota de login
 app.get('/login', (req, resp) => {
     resp.send(`
@@ -199,10 +214,9 @@ function autenticarUsuario(req, resp) {
     }
 }
 
-// Rota de login post
+
 app.post('/login', autenticarUsuario);
 
-// Rota de cadastro de produto
 app.get('/cadastrarProduto', cadastroProdutoView);
 app.get('/listarProdutos', listarProdutosView);
 app.post('/cadastrarProduto', cadastrarProduto);
