@@ -1,12 +1,26 @@
 const express = require('express');
+const session = require('express-session');
 const app = express();
-app.use(express.static('./pages/public'));
 const porta = 4001;
 const host = '0.0.0.0';
 
+app.use(express.static('./pages/public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'chave-secreta',
+    resave: false,
+    saveUninitialized: true
+}));
+
 let listaProdutos = [];
 
-app.use(express.urlencoded({ extended: true }));
+function verificarAutenticacao(req, resp, next) {
+    if (req.session.autenticado) {
+        next();
+    } else {
+        resp.redirect('/login');
+    }
+}
 
 app.get('/', (req, resp) => {
     resp.send(`
@@ -41,6 +55,65 @@ app.get('/', (req, resp) => {
             </body>
         </html>
     `);
+});
+
+app.get('/login', (req, resp) => {
+    resp.send(`
+        <html>
+            <head>
+                <title>Login</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            </head>
+            <body>
+                <div class="container w-25 mt-5">
+                    <form action='/login' method='POST' class="row g-3 needs-validation">
+                        <fieldset class="border p-2">
+                            <legend class="mb-3">Autenticação do Sistema</legend>
+                            <div class="col-md-12">
+                                <label for="usuario" class="form-label">Usuário:</label>
+                                <input type="text" class="form-control" id="usuario" name="usuario" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="senha" class="form-label">Senha</label>
+                                <input type="password" class="form-control" id="senha" name="senha" required>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <button class="btn btn-primary" type="submit">Login</button>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </body>
+        </html>
+    `);
+});
+
+app.post('/login', (req, resp) => {
+    const { usuario, senha } = req.body;
+
+    if (usuario === 'admin' && senha === '123') {
+        req.session.autenticado = true;
+        resp.redirect('/');
+    } else {
+        resp.send(`
+            <div class="alert alert-danger" role="alert">
+                Usuário ou senha inválidos!
+            </div>
+            <a href="/login" class="btn btn-primary">Tentar Novamente</a>
+        `);
+    }
+});
+
+app.get('/cadastrarProduto', verificarAutenticacao, (req, resp) => {
+    cadastroProdutoView(req, resp);
+});
+
+app.get('/listarProdutos', verificarAutenticacao, (req, resp) => {
+    listarProdutosView(req, resp);
+});
+
+app.post('/cadastrarProduto', verificarAutenticacao, (req, resp) => {
+    cadastrarProduto(req, resp);
 });
 
 function cadastroProdutoView(req, resp) {
@@ -158,7 +231,6 @@ function listarProdutosView(req, resp) {
                             `).join('')}
                         </tbody>
                     </table>
-                    <a class="btn btn-primary" href="/">Voltar ao Início</a>
                 </div>
             </body>
         </html>
@@ -167,36 +239,9 @@ function listarProdutosView(req, resp) {
 
 function cadastrarProduto(req, resp) {
     const { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante } = req.body;
-
-    if (Number(precoCusto) > Number(precoVenda)) {
-        return resp.send("Erro: O preço de custo não pode ser maior que o preço de venda!");
-    }
-
-    const produto = { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante };
-    listaProdutos.push(produto);
-
+    listaProdutos.push({ codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante });
     resp.redirect('/listarProdutos');
 }
-
-app.get('/login', (req, resp) => {
-    resp.sendFile(__dirname + '/pages/public/login.html');
-});
-
-function autenticarUsuario(req, resp) {
-    const usuario = req.body.usuario;
-    const senha = req.body.senha;
-    
-    if (usuario === 'admin' && senha === '123') {
-        resp.redirect('/');
-    } else {
-        resp.send('<div class="alert alert-danger" role="alert">Usuário ou senha inválidos!</div><a href="/login" class="btn btn-primary">Tentar Novamente</a>');
-    }
-}
-
-app.post('/login', autenticarUsuario);
-app.get('/cadastrarProduto', cadastroProdutoView);
-app.get('/listarProdutos', listarProdutosView);
-app.post('/cadastrarProduto', cadastrarProduto);
 
 app.listen(porta, host, () => {
     console.log(`Servidor rodando em http://${host}:${porta}`);
