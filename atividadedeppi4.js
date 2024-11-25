@@ -36,13 +36,13 @@ app.get('/', (req, resp) => {
                     <h1>Bem-vindo ao Cadastro de Produtos</h1>
                     <a class="btn btn-primary btn-lg m-2" href="/cadastrarProduto">Cadastrar Produto</a>
                     <a class="btn btn-success btn-lg m-2" href="/listarProdutos">Ver Produtos Cadastrados</a>
+                    <a class="btn btn-warning btn-lg m-2" href="/login">Login</a>
                 </div>
             </body>
         </html>
     `);
 });
 
-// Página de cadastro de produto
 function cadastroProdutoView(req, resp) {
     resp.send(`
         <html>
@@ -107,7 +107,6 @@ function cadastroProdutoView(req, resp) {
     `);
 }
 
-// Página de listagem de produtos
 function listarProdutosView(req, resp) {
     resp.send(`
         <html>
@@ -166,11 +165,9 @@ function listarProdutosView(req, resp) {
     `);
 }
 
-// Função de cadastro de produto
 function cadastrarProduto(req, resp) {
     const { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante } = req.body;
 
-    // Validações adicionais (exemplo)
     if (Number(precoCusto) > Number(precoVenda)) {
         return resp.send("Erro: O preço de custo não pode ser maior que o preço de venda!");
     }
@@ -181,42 +178,22 @@ function cadastrarProduto(req, resp) {
     resp.redirect('/listarProdutos');
 }
 
-// Rota de login
 app.get('/login', (req, resp) => {
-    resp.send(`
-        <html>
-            <body>
-                <h1>Login</h1>
-                <form action="/login" method="POST">
-                    <div>
-                        <label for="usuario">Usuário:</label>
-                        <input type="text" id="usuario" name="usuario" required>
-                    </div>
-                    <div>
-                        <label for="senha">Senha:</label>
-                        <input type="password" id="senha" name="senha" required>
-                    </div>
-                    <button type="submit">Entrar</button>
-                </form>
-            </body>
-        </html>
-    `);
+    resp.sendFile(__dirname + '/pages/public/login.html');
 });
 
-// Função de autenticação
 function autenticarUsuario(req, resp) {
-    const { usuario, senha } = req.body;
-
+    const usuario = req.body.usuario;
+    const senha = req.body.senha;
+    
     if (usuario === 'admin' && senha === '123') {
         resp.redirect('/');
     } else {
-        resp.send('<div class="alert alert-danger" role="alert">Usuário ou senha inválidos!</div><a href="/login" class="btn btn-primary">Tentar novamente</a>');
+        resp.send('<div class="alert alert-danger" role="alert">Usuário ou senha inválidos!</div><a href="/login" class="btn btn-primary">Tentar Novamente</a>');
     }
 }
 
-
 app.post('/login', autenticarUsuario);
-
 app.get('/cadastrarProduto', cadastroProdutoView);
 app.get('/listarProdutos', listarProdutosView);
 app.post('/cadastrarProduto', cadastrarProduto);
