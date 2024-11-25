@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express();
+app.use(express.static('./pages/pubic'));
 const porta = 4001;
 const host = '0.0.0.0';
 
-let listaEscolas = [];
+let listaProdutos = [];
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -15,7 +16,7 @@ app.get('/', (req, resp) => {
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
                 <style>
                     body {
-                        background: linear-gradient(45deg, #FFDD93, #FFC3A0, #FF9B93);
+                        background: linear-gradient(45deg, #66cc66, #ffcc00, #ff9900);
                         min-height: 100vh;
                         display: flex;
                         justify-content: center;
@@ -32,24 +33,25 @@ app.get('/', (req, resp) => {
             </head>
             <body>
                 <div class="container">
-                    <h1>Bem-vindo ao Cadastro de Escolas</h1>
-                    <a class="btn btn-primary btn-lg m-2" href="/cadastrarEscola">Cadastrar Escola</a>
-                    <a class="btn btn-success btn-lg m-2" href="/listarEscolas">Ver Escolas Cadastradas</a>
+                    <h1>Bem-vindo ao Cadastro de Produtos</h1>
+                    <a class="btn btn-primary btn-lg m-2" href="/cadastrarProduto">Cadastrar Produto</a>
+                    <a class="btn btn-success btn-lg m-2" href="/listarProdutos">Ver Produtos Cadastrados</a>
                 </div>
             </body>
         </html>
     `);
 });
 
-function cadastroEscolaView(req, resp) {
+// Página de cadastro de produto
+function cadastroProdutoView(req, resp) {
     resp.send(`
         <html>
             <head>
-                <title>Cadastro de Escolas</title>
+                <title>Cadastro de Produtos</title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
                 <style>
                     body {
-                        background: linear-gradient(45deg, #FFDD93, #FFC3A0, #FF9B93);
+                        background: linear-gradient(45deg, #66cc66, #ffcc00, #ff9900);
                         min-height: 100vh;
                         display: flex;
                         justify-content: center;
@@ -61,22 +63,43 @@ function cadastroEscolaView(req, resp) {
                         border-radius: 10px;
                         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                     }
-                    input, select, button {
-                        border: 2px solid #FF6F61; 
-                        background-color: #FFF7E0; 
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    }
-                    input:focus, select:focus {
-                        outline: none;
-                        border-color: #FF9B93; 
-                    }
                 </style>
             </head>
             <body>
                 <div class="container mt-5">
-                    <h1>Cadastro de Escolas</h1>
-                    <form method="POST" action="/cadastrarEscola" class="border p-4 row g-3">
-                        <!-- Campos de cadastro aqui -->
+                    <h1>Cadastro de Produtos</h1>
+                    <form method="POST" action="/cadastrarProduto" class="border p-4 row g-3">
+                        <div class="col-md-6">
+                            <label for="codigoBarras" class="form-label">Código de Barras</label>
+                            <input type="text" class="form-control" id="codigoBarras" name="codigoBarras" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="descricao" class="form-label">Descrição do Produto</label>
+                            <input type="text" class="form-control" id="descricao" name="descricao" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="precoCusto" class="form-label">Preço de Custo</label>
+                            <input type="number" step="0.01" class="form-control" id="precoCusto" name="precoCusto" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="precoVenda" class="form-label">Preço de Venda</label>
+                            <input type="number" step="0.01" class="form-control" id="precoVenda" name="precoVenda" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dataValidade" class="form-label">Data de Validade</label>
+                            <input type="date" class="form-control" id="dataValidade" name="dataValidade" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="qtdEstoque" class="form-label">Quantidade em Estoque</label>
+                            <input type="number" class="form-control" id="qtdEstoque" name="qtdEstoque" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="nomeFabricante" class="form-label">Nome do Fabricante</label>
+                            <input type="text" class="form-control" id="nomeFabricante" name="nomeFabricante" required>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Cadastrar Produto</button>
+                        </div>
                     </form>
                 </div>
             </body>
@@ -84,15 +107,16 @@ function cadastroEscolaView(req, resp) {
     `);
 }
 
-function listarEscolasView(req, resp) {
+// Página de listagem de produtos
+function listarProdutosView(req, resp) {
     resp.send(`
         <html>
             <head>
-                <title>Lista de Escolas</title>
+                <title>Lista de Produtos</title>
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
                 <style>
                     body {
-                        background: linear-gradient(45deg, #FFDD93, #FFC3A0, #FF9B93);
+                        background: linear-gradient(45deg, #66cc66, #ffcc00, #ff9900);
                         min-height: 100vh;
                         display: flex;
                         justify-content: center;
@@ -108,33 +132,29 @@ function listarEscolasView(req, resp) {
             </head>
             <body>
                 <div class="container mt-5">
-                    <h2>Escolas Cadastradas</h2>
+                    <h2>Produtos Cadastrados</h2>
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>CNPJ</th>
-                                <th>Razão Social</th>
-                                <th>Nome Fantasia</th>
-                                <th>Endereço</th>
-                                <th>Cidade</th>
-                                <th>UF</th>
-                                <th>CEP</th>
-                                <th>Email</th>
-                                <th>Telefone</th>
+                                <th>Código de Barras</th>
+                                <th>Descrição</th>
+                                <th>Preço de Custo</th>
+                                <th>Preço de Venda</th>
+                                <th>Data de Validade</th>
+                                <th>Quantidade em Estoque</th>
+                                <th>Fabricante</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${listaEscolas.map(escola => `
+                            ${listaProdutos.map(produto => `
                                 <tr>
-                                    <td>${escola.cnpj}</td>
-                                    <td>${escola.razaoSocial}</td>
-                                    <td>${escola.nomeFantasia}</td>
-                                    <td>${escola.endereco}</td>
-                                    <td>${escola.cidade}</td>
-                                    <td>${escola.uf}</td>
-                                    <td>${escola.cep}</td>
-                                    <td>${escola.email}</td>
-                                    <td>${escola.telefone}</td>
+                                    <td>${produto.codigoBarras}</td>
+                                    <td>${produto.descricao}</td>
+                                    <td>R$ ${produto.precoCusto}</td>
+                                    <td>R$ ${produto.precoVenda}</td>
+                                    <td>${produto.dataValidade}</td>
+                                    <td>${produto.qtdEstoque}</td>
+                                    <td>${produto.nomeFabricante}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -146,15 +166,24 @@ function listarEscolasView(req, resp) {
     `);
 }
 
-function cadastrarEscola(req, resp) {
-    const { cnpj, razaoSocial, nomeFantasia, endereco, cidade, uf, cep, email, telefone } = req.body;
-    listaEscolas.push({ cnpj, razaoSocial, nomeFantasia, endereco, cidade, uf, cep, email, telefone });
-    resp.redirect('/listarEscolas');
+// Rota de cadastro de produto
+function cadastrarProduto(req, resp) {
+    const { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante } = req.body;
+
+    // Validações adicionais (exemplo)
+    if (Number(precoCusto) > Number(precoVenda)) {
+        return resp.send("Erro: O preço de custo não pode ser maior que o preço de venda!");
+    }
+
+    const produto = { codigoBarras, descricao, precoCusto, precoVenda, dataValidade, qtdEstoque, nomeFabricante };
+    listaProdutos.push(produto);
+
+    resp.redirect('/listarProdutos');
 }
 
-app.get('/cadastrarEscola', cadastroEscolaView);
-app.get('/listarEscolas', listarEscolasView);
-app.post('/cadastrarEscola', cadastrarEscola);
+app.get('/cadastrarProduto', cadastroProdutoView);
+app.get('/listarProdutos', listarProdutosView);
+app.post('/cadastrarProduto', cadastrarProduto);
 
 app.listen(porta, host, () => {
     console.log(`Servidor rodando em http://${host}:${porta}`);
