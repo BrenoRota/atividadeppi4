@@ -19,7 +19,7 @@
   "homepage": "https://github.com/BrenoRota/atividadeppi4#readme",
   "dependencies": {
     "express": "^4.21.1",
-    "nodemon": "^3.1.7",
-    "session": "^0.1.0"
+    "express-session": "^1.18.1",
+    "nodemon": "^3.1.7"
   }
 }
