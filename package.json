@@ -1,0 +1,20 @@
+{
+  "name": "atividadeppi4",
+  "version": "1.0.0",
+  "description": "Atividade de Programacao para Internet",
+  "main": "atividadeppi4.js",
+  "scripts": {
+    "start": "node atividadeppi4.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrenoRota/atividadeppi4.git"
+  },
+  "author": "Breno Rota de Carvalho Lobo Marques",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrenoRota/atividadeppi4/issues"
+  },
+  "homepage": "https://github.com/BrenoRota/atividadeppi4#readme"
+}
